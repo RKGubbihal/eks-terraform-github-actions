@@ -6,7 +6,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:400338099943:certificate/362a9661-33a1-40b6-a61e-7ef7c3cc7031
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:400338099943:certificate/3f729118-8715-4700-89c4-404a3f8059a7
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/group.name: eks-devops-apps

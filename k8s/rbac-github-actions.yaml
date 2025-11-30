@@ -1,13 +1,15 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: github-actions-admin
+  name: aidevopsuser-admin
+#  name: github-actions-admin
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
   - kind: User
-    name: arn:aws:iam::400338099943:role/eks-devops-cluster-cluster-20251130034924713600000002
+#    name: arn:aws:iam::400338099943:role/eks-devops-cluster-cluster-20251130034924713600000002
+    name: arn:aws:iam::400338099943:user/AIDevOpsUser
     apiGroup: rbac.authorization.k8s.io
 

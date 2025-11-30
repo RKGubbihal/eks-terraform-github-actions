@@ -18,7 +18,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-south-1
+        aws-region: us-west-2
 
     # ----------------- Build Number (Auto Increment) -----------------
     - name: 🔢 Generate Build Tag
@@ -52,7 +52,7 @@ jobs:
       working-directory: frontend-app
       run: |
         IMAGE_TAG=${{ steps.buildnumber.outputs.BUILD_TAG }}
-        ECR_REPO=666930281169.dkr.ecr.ap-south-1.amazonaws.com/devops
+        ECR_REPO=400338099943.dkr.ecr.us-west-2.amazonaws.com/springboot-eks
 
         echo "🚀 Building version: $IMAGE_TAG"
 
@@ -66,18 +66,18 @@ jobs:
     - name: 🧠 Install kubectl
       uses: azure/setup-kubectl@v3
       with:
-        version: 'v1.34.0'
+        version: 'v1.33.0'
 
     - name: 📡 Update kubeconfig
       run: |
         aws eks update-kubeconfig \
-          --region ap-south-1 \
+          --region us-west-2 \
           --name eks-devops-cluster
 
     - name: 🚀 Deploy to Kubernetes
       run: |
         IMAGE_TAG=${{ steps.buildnumber.outputs.BUILD_TAG }}
-        ECR_REPO=666930281169.dkr.ecr.ap-south-1.amazonaws.com/devops
+        ECR_REPO=400338099943.dkr.ecr.us-west-2.amazonaws.com/springboot-eks
 
         echo "Deploying image: $ECR_REPO:$IMAGE_TAG"
 

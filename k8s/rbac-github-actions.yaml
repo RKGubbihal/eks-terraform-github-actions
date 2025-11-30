@@ -8,6 +8,6 @@ roleRef:
   name: cluster-admin
 subjects:
   - kind: User
-    name: arn:aws:iam::666930281169:user/GitHub-Actions
+    name: arn:aws:iam::400338099943:user/GitHub-Actions # Replace with your IAM user ARN
     apiGroup: rbac.authorization.k8s.io
 

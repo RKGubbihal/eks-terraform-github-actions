@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: eks-devops-app
-        image: 666930281169.dkr.ecr.ap-south-1.amazonaws.com/devops:latest
+        image: 400338099943.dkr.ecr.us-west-2.amazonaws.com/springboot-eks:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80

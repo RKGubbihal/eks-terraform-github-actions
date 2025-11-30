@@ -8,6 +8,7 @@ roleRef:
   name: cluster-admin
 subjects:
   - kind: User
-    name: arn:aws:iam::400338099943:user/AIDevOpsUser
+    name: arn:aws:iam::400338099943:role/eks-devops-cluster-cluster-20251130034924713600000002
+#    name: arn:aws:iam::400338099943:user/AIDevOpsUser
     apiGroup: rbac.authorization.k8s.io
 

@@ -11,10 +11,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.23"
-    }
   }
 }
 
@@ -37,45 +33,10 @@ module "eks" {
   node_group_name = var.node_group_name
 }
 
-#############################################
-# Kubernetes Provider Configuration
-#############################################
-provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args = [
-      "eks",
-      "get-token",
-      "--cluster-name",
-      module.eks.cluster_name
-    ]
-  }
-}
-
-#############################################
-# RBAC Configuration for GitHub Actions
-#############################################
-resource "kubernetes_cluster_role_binding" "cluster_admin_group_binding" {
-  depends_on = [module.eks]
-
-  metadata {
-    name = "cluster-admin-group-binding"
-  }
-
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "cluster-admin"
-  }
-
-  subject {
-    kind      = "Group"
-    name      = "cluster-admin"
-    api_group = "rbac.authorization.k8s.io"
-  }
-}
+# Note: The ClusterRoleBinding for the cluster-admin group must be created manually
+# or via a bootstrap script using credentials with admin access to the cluster.
+# This is because the IAM user (AIDevOpsUser) cannot create ClusterRoleBindings
+# until the binding exists (chicken-and-egg problem).
+#
+# See scripts/bootstrap-rbac.sh for the bootstrap script.
 

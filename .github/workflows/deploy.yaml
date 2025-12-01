@@ -77,9 +77,16 @@ jobs:
     - name: 🔐 Apply RBAC Configuration
       run: |
         echo "Applying RBAC configuration..."
-        kubectl apply -f k8s/rbac-github-actions.yaml || echo "RBAC may already exist (created by Terraform)"
+        # Try to apply RBAC - this will fail if user doesn't have permissions yet
+        # In that case, the ClusterRoleBinding needs to be created manually via bootstrap script
+        if ! kubectl apply -f k8s/rbac-github-actions.yaml; then
+          echo "⚠️  Warning: Failed to apply RBAC. This is expected if the ClusterRoleBinding doesn't exist yet."
+          echo "⚠️  The ClusterRoleBinding must be created once using admin credentials."
+          echo "⚠️  Run: scripts/bootstrap-rbac.sh (with admin credentials) or create it manually."
+          echo "⚠️  Continuing with deployment attempt..."
+        fi
         echo "Verifying RBAC permissions..."
-        kubectl auth can-i get deployments --all-namespaces || echo "Warning: Permission check failed"
+        kubectl auth can-i get deployments --all-namespaces || echo "Warning: Permission check failed - RBAC may not be configured yet"
 
     - name: 🚀 Deploy to Kubernetes
       run: |

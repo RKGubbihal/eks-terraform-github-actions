@@ -1,17 +1,30 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  # must be lowercase per RFC 1123
-  name: aidedevopsuser-admin
+  name: cluster-admin-group-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
-  - kind: User
+  - kind: Group
     apiGroup: rbac.authorization.k8s.io
-    # MUST match exactly what Kubernetes shows in the error
-    name: arn:aws:iam::400338099943:user/AIDevOpsUser
+    name: cluster-admin   # <- from kubernetesGroups in describe-access-entry
+
+#apiVersion: rbac.authorization.k8s.io/v1
+#kind: ClusterRoleBinding
+#metadata:
+#  # must be lowercase per RFC 1123
+#  name: aidedevopsuser-admin
+#roleRef:
+#  apiGroup: rbac.authorization.k8s.io
+#  kind: ClusterRole
+#  name: cluster-admin
+#subjects:
+#  - kind: User
+#    apiGroup: rbac.authorization.k8s.io
+#    # MUST match exactly what Kubernetes shows in the error
+#    name: arn:aws:iam::400338099943:user/AIDevOpsUser
 
 #apiVersion: rbac.authorization.k8s.io/v1
 #kind: ClusterRoleBinding

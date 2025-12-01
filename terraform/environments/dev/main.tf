@@ -5,6 +5,17 @@ terraform {
     region  = "us-west-2"
     encrypt = true
   }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.23"
+    }
+  }
 }
 
 module "vpc" {
@@ -24,5 +35,47 @@ module "eks" {
 
   cluster_name    = var.cluster_name
   node_group_name = var.node_group_name
+}
+
+#############################################
+# Kubernetes Provider Configuration
+#############################################
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args = [
+      "eks",
+      "get-token",
+      "--cluster-name",
+      module.eks.cluster_name
+    ]
+  }
+}
+
+#############################################
+# RBAC Configuration for GitHub Actions
+#############################################
+resource "kubernetes_cluster_role_binding" "cluster_admin_group_binding" {
+  depends_on = [module.eks]
+
+  metadata {
+    name = "cluster-admin-group-binding"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+
+  subject {
+    kind      = "Group"
+    name      = "cluster-admin"
+    api_group = "rbac.authorization.k8s.io"
+  }
 }
 

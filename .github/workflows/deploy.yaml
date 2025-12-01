@@ -74,6 +74,13 @@ jobs:
           --region us-west-2 \
           --name eks-devops-cluster
 
+    - name: 🔐 Apply RBAC Configuration
+      run: |
+        echo "Applying RBAC configuration..."
+        kubectl apply -f k8s/rbac-github-actions.yaml || echo "RBAC may already exist (created by Terraform)"
+        echo "Verifying RBAC permissions..."
+        kubectl auth can-i get deployments --all-namespaces || echo "Warning: Permission check failed"
+
     - name: 🚀 Deploy to Kubernetes
       run: |
         IMAGE_TAG=${{ steps.buildnumber.outputs.BUILD_TAG }}
@@ -81,10 +88,13 @@ jobs:
 
         echo "Deploying image: $ECR_REPO:$IMAGE_TAG"
 
-        kubectl set image deployment/eks-devops-app \
-          eks-devops-app=$ECR_REPO:$IMAGE_TAG
-
+        # Apply all Kubernetes manifests first (this creates the deployment if it doesn't exist)
         kubectl apply -f k8s/
+
+        # Update deployment image
+        kubectl set image deployment/eks-devops-app \
+          eks-devops-app=$ECR_REPO:$IMAGE_TAG \
+          --namespace=default
 
     - name: ✅ Verify Rollout
       run: |

@@ -89,7 +89,7 @@ jobs:
     - name: 🔐 Verify EKS Access
       run: |
         echo "Verifying EKS access permissions..."
-        # With EKS access policies, permissions are managed by AWS, not Kubernetes RBAC
+        # With EKS access policies, permissions are managed by AWS, not Kubernetes RBAC..
         # The access policy (AmazonEKSClusterAdminPolicy) is configured in Terraform
         kubectl auth can-i get deployments --all-namespaces && echo "✅ Permissions verified" || echo "⚠️  Warning: Permission check failed - access policies may not be applied yet"
 

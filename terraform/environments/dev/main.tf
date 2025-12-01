@@ -33,10 +33,8 @@ module "eks" {
   node_group_name = var.node_group_name
 }
 
-# Note: The ClusterRoleBinding for the cluster-admin group must be created manually
-# or via a bootstrap script using credentials with admin access to the cluster.
-# This is because the IAM user (AIDevOpsUser) cannot create ClusterRoleBindings
-# until the binding exists (chicken-and-egg problem).
-#
-# See scripts/bootstrap-rbac.sh for the bootstrap script.
+# Note: EKS access policies are used instead of kubernetes_groups to avoid the
+# chicken-and-egg RBAC problem. Access policies (AmazonEKSClusterAdminPolicy) are
+# managed entirely by AWS and don't require Kubernetes RBAC resources.
+# See terraform/modules/eks/main.tf for the access policy configuration.
 

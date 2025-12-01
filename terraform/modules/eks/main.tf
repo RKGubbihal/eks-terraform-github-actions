@@ -22,8 +22,18 @@ module "eks" {
 
   access_entries = {
     github_actions = {
-      principal_arn     = "arn:aws:iam::400338099943:user/AIDevOpsUser"
-      kubernetes_groups = ["cluster-admin"]
+      principal_arn = "arn:aws:iam::400338099943:user/AIDevOpsUser"
+      # Use access policies instead of kubernetes_groups to avoid RBAC chicken-and-egg problem
+      # Access policies are AWS-managed and don't require Kubernetes RBAC resources
+      # Note: Do not set kubernetes_groups when using access_policy_associations
+      access_policy_associations = {
+        cluster_admin = {
+          policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
     }
   }
 

@@ -37,9 +37,21 @@ jobs:
       working-directory: terraform/environments/dev
       run: terraform init
 
+    - name: 📐 Terraform Plan
+      working-directory: terraform/environments/dev
+      run: terraform plan
+
     - name: 📐 Terraform Apply
       working-directory: terraform/environments/dev
       run: terraform apply -auto-approve
+
+    - name: 🔍 Verify Access Entry
+      run: |
+        echo "Verifying EKS access entry configuration..."
+        aws eks describe-access-entry \
+          --cluster-name eks-devops-cluster \
+          --principal-arn arn:aws:iam::400338099943:user/AIDevOpsUser \
+          --region us-west-2 || echo "⚠️  Could not verify access entry (this is OK if it doesn't exist yet)"
 
     # ----------------- Docker Build & Push -----------------
     - name: 🔐 Login to ECR
@@ -74,19 +86,12 @@ jobs:
           --region us-west-2 \
           --name eks-devops-cluster
 
-    - name: 🔐 Apply RBAC Configuration
+    - name: 🔐 Verify EKS Access
       run: |
-        echo "Applying RBAC configuration..."
-        # Try to apply RBAC - this will fail if user doesn't have permissions yet
-        # In that case, the ClusterRoleBinding needs to be created manually via bootstrap script
-        if ! kubectl apply -f k8s/rbac-github-actions.yaml; then
-          echo "⚠️  Warning: Failed to apply RBAC. This is expected if the ClusterRoleBinding doesn't exist yet."
-          echo "⚠️  The ClusterRoleBinding must be created once using admin credentials."
-          echo "⚠️  Run: scripts/bootstrap-rbac.sh (with admin credentials) or create it manually."
-          echo "⚠️  Continuing with deployment attempt..."
-        fi
-        echo "Verifying RBAC permissions..."
-        kubectl auth can-i get deployments --all-namespaces || echo "Warning: Permission check failed - RBAC may not be configured yet"
+        echo "Verifying EKS access permissions..."
+        # With EKS access policies, permissions are managed by AWS, not Kubernetes RBAC
+        # The access policy (AmazonEKSClusterAdminPolicy) is configured in Terraform
+        kubectl auth can-i get deployments --all-namespaces && echo "✅ Permissions verified" || echo "⚠️  Warning: Permission check failed - access policies may not be applied yet"
 
     - name: 🚀 Deploy to Kubernetes
       run: |
@@ -95,8 +100,10 @@ jobs:
 
         echo "Deploying image: $ECR_REPO:$IMAGE_TAG"
 
-        # Apply all Kubernetes manifests first (this creates the deployment if it doesn't exist)
-        kubectl apply -f k8s/
+        # Apply Kubernetes manifests (excluding RBAC file - using EKS access policies instead)
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
+        kubectl apply -f k8s/ingress.yaml
 
         # Update deployment image
         kubectl set image deployment/eks-devops-app \
